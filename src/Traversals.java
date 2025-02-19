@@ -11,7 +11,29 @@ public class Traversals {
    * @return the sum of leaf node values, or 0 if the tree is null
    */
   public static int sumLeafNodes(TreeNode<Integer> node) {
-    return 0;
+
+    if (node == null) {
+      return 0;
+    }
+
+    // Checking the root node
+    if (node.left == null && node.right == null) {
+      return node.value;
+    }
+
+    int leafSum = 0;
+
+    // Checking the left subtree
+    if (node.left != null) {
+      leafSum += sumLeafNodes(node.left);
+    }
+
+    // Checking the right subtree
+    if (node.right != null) {
+      leafSum += sumLeafNodes(node.right);
+    }
+
+    return leafSum;
   }
 
   /**
@@ -23,7 +45,27 @@ public class Traversals {
    * @return the count of internal nodes, or 0 if the tree is null
    */
   public static int countInternalNodes(TreeNode<Integer> node) {
-    return 0;
+
+    if (node == null) {
+      return 0;
+    }
+
+    // Checking the root - Returning 0 if it has no children since it won't be an internal node
+    if (node.left == null && node.right == null) {
+      return 0;
+    }
+
+    int internalNodeCount = 1;
+
+    if (node.left != null) {
+      internalNodeCount += countInternalNodes(node.left);
+    }
+
+    if (node.right != null) {
+      internalNodeCount += countInternalNodes(node.right);
+    }
+
+    return internalNodeCount;
   }
 
   /**
@@ -37,7 +79,24 @@ public class Traversals {
    * @return a post-order traversal string, or an empty string if the tree is null
    */
   public static <T> String buildPostOrderString(TreeNode<T> node) {
-    return null;
+
+    if (node == null) {
+      return "";
+    }
+
+    String concString = "";
+
+    if (node.left != null) {
+      concString += buildPostOrderString(node.left);
+    }
+
+    if (node.right != null) {
+      concString += buildPostOrderString(node.right);
+    }
+
+    concString += node.value.toString();
+
+    return concString;
   }
 
   /**
@@ -49,7 +108,30 @@ public class Traversals {
    * @return a list of node values in a top-to-bottom order, or an empty list if the tree is null
    */
   public static <T> List<T> collectLevelOrderValues(TreeNode<T> node) {
-    return null;
+
+    if (node == null) {
+      return new ArrayList<>();
+    }
+
+    Queue<TreeNode<T>> queue = new LinkedList<>();
+    List<T> levelOrder = new ArrayList<>();
+
+    queue.add(node);
+
+    while (!queue.isEmpty()) {
+      TreeNode<T> current = queue.poll();
+      levelOrder.add(current.value);
+
+      if (current.left != null) {
+        queue.add(current.left);
+      }
+
+      if (current.right != null) {
+        queue.add(current.right);
+      }
+    }
+
+    return levelOrder;
   }
 
   /**
@@ -60,7 +142,27 @@ public class Traversals {
    * @return the number of unique values in the tree, or 0 if the tree is null
    */
   public static int countDistinctValues(TreeNode<Integer> node) {
-    return 0;
+        // 'Unique values' = HashSet/HashMap
+        Set<Integer> uniValues = new HashSet<>();
+
+        // Pass the nodes and set to the helper method
+        cDVHelper(node, uniValues);
+
+        // Return size of the set
+        return uniValues.size();
+  }
+
+  public static void cDVHelper (TreeNode<Integer> node, Set<Integer> uniValues) {
+    if (node == null) {
+      return;
+    }
+
+    // Add root node to the set
+    uniValues.add(node.value);
+
+    // Move down left and right subtrees checking for unique values
+    cDVHelper(node.left, uniValues);
+    cDVHelper(node.right, uniValues);
   }
 
   /**
@@ -72,7 +174,28 @@ public class Traversals {
    * @return true if there exists a strictly increasing root-to-leaf path, false otherwise
    */
   public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) {
-    return false;
+
+    if (node == null) {
+      return false;
+    }
+
+    return strictIncPathHelper(node, 0);
+  }
+
+  public static boolean strictIncPathHelper(TreeNode<Integer> node, int currentNodeValue) {
+    if (node == null) {
+      return false;
+    }
+    
+    if (node.value <= currentNodeValue) {
+      return false;
+    }
+
+    if (node.left == null && node.right == null) {
+      return true;
+    }
+
+    return strictIncPathHelper(node.left, node.value) || strictIncPathHelper(node.right, node.value);
   }
 
   // OPTIONAL CHALLENGE
@@ -87,7 +210,15 @@ public class Traversals {
    * @return true if the trees have the same shape, false otherwise
    */
   public static <T> boolean haveSameShape(TreeNode<T> nodeA, TreeNode<T> nodeB) {
-    return false;
+    if (nodeA == null && nodeB == null) {
+      return true;
+    }
+
+    if (nodeA == null || nodeB == null) {
+      return false;
+    }
+
+    return haveSameShape(nodeA.left, nodeB.left) && haveSameShape(nodeA.right, nodeB.right);
   }
 
 
@@ -119,6 +250,40 @@ public class Traversals {
    * @return a list of lists, where each inner list represents a root-to-leaf path in pre-order
    */
   public static <T> List<List<T>> findAllRootToLeafPaths(TreeNode<T> node) {
-    return null;
+
+    if (node == null) {
+      return new ArrayList<>();
+    }
+
+    List<List<T>> rToLPaths = new ArrayList<>();
+    List<T> currentTrackedPath = new ArrayList<>();
+
+    rToLPathHelper(node, rToLPaths, currentTrackedPath);
+    
+    return rToLPaths;
   }
+
+  public static <T> void rToLPathHelper (TreeNode<T> node, List<List<T>> rToLPaths, List<T> currentTrackedPath) {
+    
+    if (node == null) {
+      return;
+    }
+
+    currentTrackedPath.add(node.value);
+
+    // This is where I started getting a little stuck
+    if (node.left == null && node.right == null) {
+      // ^ If both nodes are null, it's a leaf node
+      rToLPaths.add(List.copyOf(currentTrackedPath));
+      // ^ Make a copy of cTP and add it to rTLP
+    } else {
+      // If it's not a leaf node, recurse as normal down the path
+      rToLPathHelper(node.left, rToLPaths, currentTrackedPath);
+      rToLPathHelper(node.right, rToLPaths, currentTrackedPath);
+    }
+
+    // When the end of a path is reached, it removes the last value in cTP as it returns up the path
+    currentTrackedPath.remove(currentTrackedPath.size() - 1);
+  }
+
 }
